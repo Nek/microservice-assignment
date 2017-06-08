@@ -12,7 +12,7 @@
     "swagger-express-mw": "^0.1.0"
   },
   "devDependencies": {
-    "should": "^7.1.0",
+    "should": "^11.2.1",
     "supertest": "^1.0.0"
   },
   "scripts": {

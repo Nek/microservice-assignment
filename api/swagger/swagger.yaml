@@ -17,44 +17,69 @@ consumes:
 # format of the responses to the client (Accepts)
 produces:
   - application/json
+
 paths:
-  /hello:
-    # binds a127 app logic to a route
-    x-swagger-router-controller: hello_world
+  /config/{client}/{version}:
+    x-swagger-router-controller: config
     get:
-      description: Returns 'Hello' to the caller
-      # used as the method name of the controller
-      operationId: hello
+      operationId: read
+      description: Get all changed configurations since the last received change for a given client and version
       parameters:
-        - name: name
-          in: query
-          description: The name of the person to whom to say hello
-          required: false
+        - name: client
+          in: path
           type: string
+          required: true
+          description: Identifier for the client (e.g. "ios-m-omni")
+        - name: version
+          in: path
+          type: string
+          required: true
+          description: Build version of the client (e.g. "267")
+        - name: If-None-Match
+          in: header
+          type: string
+          required: false
+          description: The ETag of the last acquired configuration (e.g. W/"1")
       responses:
-        "200":
-          description: Success
+        304:
+          description: No changed fields
+        200:
+          description: An object with changes since the given ETag
           schema:
-            # a pointer to a definition
-            $ref: "#/definitions/HelloWorldResponse"
-        # responses may fall through to errors
+            example: '{ "ads_endpoint": "/devads" }'
         default:
           description: Error
+  /config:
+    x-swagger-router-controller: config
+    post:
+      operationId: upsert
+      description: Change or create a configuration
+      parameters:
+        - name: body
+          in: body
+          required: true
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            required:
+              - client
+              - version
+              - key
+              - value
+            properties:
+              client:
+                type: string
+              version:
+                type: string
+              key:
+                type: string
+              value:
+                type: string
+      responses:
+        201:
+          description: Created
+          schema:
+            type: object
+        default:
+          description: Error
+
   /swagger:
     x-swagger-pipe: swagger_raw
-# complex objects have schema definitions
-definitions:
-  HelloWorldResponse:
-    required:
-      - message
-    properties:
-      message:
-        type: string
-  ErrorResponse:
-    required:
-      - message
-    properties:
-      message:
-        type: string
