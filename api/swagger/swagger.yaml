@@ -1,14 +1,11 @@
 swagger: "2.0"
 info:
   version: "0.0.1"
-  title: Hello World App
-# during dev, should point to your local machine
+  title: schibsted test
 host: localhost:10010
 # basePath prefixes all resource paths 
 basePath: /
-# 
 schemes:
-  # tip: remove http to make production-grade
   - http
   - https
 # format of bodies a client can send (Content-Type)
