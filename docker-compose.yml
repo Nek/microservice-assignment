@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+  web:
+    build: .
+    ports:
+      - "80:10010"
+    links:
+      - mongo
+  mongo:
+    image: mongo
+    ports: 
+      - "27027:27027"
+  data:
+    image: tianon/true
+    volumes:
+      - /data/db
