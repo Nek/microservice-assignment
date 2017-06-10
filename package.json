@@ -9,14 +9,18 @@
   "main": "app.js",
   "dependencies": {
     "express": "^4.12.3",
+    "mongodb": "^2.2.28",
     "swagger-express-mw": "^0.1.0"
   },
   "devDependencies": {
+    "istanbul": "^0.4.5",
+    "mocha": "^3.4.2",
     "should": "^11.2.1",
     "supertest": "^1.0.0"
   },
   "scripts": {
     "start": "node app.js",
-    "test": "swagger project test"
+    "test:integration": "swagger project test",
+    "test:coverage": "swagger_mockMode=true istanbul cover node_modules/.bin/_mocha -- --recursive test/"
   }
 }
