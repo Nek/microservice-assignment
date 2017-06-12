@@ -8,7 +8,7 @@ describe('config model', () => {
   describe('find', () => {
     describe('missing config', () => {
       it('resolves with undefined for missing configuration', (done) => {
-        model.find({ client: 'ios', version: 123 })
+        model.find({ client: 'ios', version: '123' })
           .then(record => {
             should.not.exist(record);
             done();
@@ -19,46 +19,67 @@ describe('config model', () => {
   describe('upsert', () => {
     describe('new config', () => {
       it('resolves with new config record', (done) => {
-        const input = { client: "ios", version: 123, key: 'color', value: 'red' };
+        const input = { client: 'ios', version: '123', key: 'color', value: 'red' };
         model.upsert(input)
           .then(record => {
-            record.should.have.properties({ client: "ios",
-                                            version: 123,
+            record.should.have.properties({ client: 'ios',
+                                            version: '123',
                                             color: 'red'
                                           });
             done();
           })
-          .catch(() => done());
+          .catch(error => {
+            done(new Error(error));
+          });
       });
     });
     describe('existing config', () => {
-      it('resolves with updated config record', (done) => {
-        const input = { client: "ios", version: 123, key: 'color', value: 'red' };
-        model.upsert(input)
-          .then(() => model.upsert( Object.merge(input, { value: 'green' }) ))
-          .then(record => {
-            record.should.have.properties(Object.merge(input, { color: 'green' }));
-            done();
-          })
-          .catch(() => done());
+      describe('with existing property', () => {
+        it('resolves with config record with updated property', (done) => {
+          model.upsert({ client: 'ios', version: '123', key: 'color', value: 'red' })
+            .then(() => model.upsert( { client: 'ios', version: '123', key: 'color', value: 'green' } ))
+            .then(record => {
+              record.should.have.properties({ client: 'ios', version: '123', color: 'green' });
+              done();
+            })
+            .catch(error => {
+              done(new Error(error));
+            });
+        });
+      });
+      describe('with new property', () => {
+        it('resolves with config record with updated property', (done) => {
+          model.upsert({ client: 'ios', version: '123', key: 'color', value: 'red' })
+            .then(() => model.upsert({ client: 'ios', version: '123', key: 'size', value: 'XL' }))
+            .then(() => model.find({ client: 'ios', version: '123'}))
+            .then(record => {
+              record.should.have.properties({ client: 'ios', version: '123', color: 'red', size: 'XL' });
+              done();
+            })
+            .catch(error => {
+              done(new Error(error));
+            });
+        });
       });
     });
   });
   describe('upsert and find', () => {
     describe('new config',() => {
       it('resolves with config record', (done) => {
-        const input = { client: "ios", version: 123, key: 'color', value: 'red' };
-        model.upsert(input)
-          .then(()=> model.find({ client: input.client, version: input.version }))
+        const input = { client: 'ios', version: '123', key: 'color', value: 'red' };
+        model.upsert({ client: 'ios', version: '123', key: 'color', value: 'red' })
+          .then(()=> model.find({ client: 'ios', version: '123' }))
           .then(record => {
             record.should.have.properties({
               client: 'ios',
-              version: 123,
+              version: '123',
               color: 'red'
             });
             done();
           })
-          .catch(() => done());
+          .catch(error => {
+            done(new Error(error));
+          });
       });
     });
   });

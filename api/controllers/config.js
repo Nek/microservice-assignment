@@ -4,8 +4,7 @@ const model = require('../models/config');
 
 
 function upsert(req, res) {
-  console.log(req.swagger.params.body.value);
-  res.status(201).json({});
+  res.status(201).send();
 }
 
 function read(req, res) {
@@ -15,7 +14,7 @@ function read(req, res) {
     version: version.value
   }).then(record => {
     if (record) {
-      res.status(200).send();
+      res.status(200).json({});
     } else {
       res.status(304).send();
     }

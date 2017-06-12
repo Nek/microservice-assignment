@@ -34,7 +34,7 @@ const Schema = mongoose.Schema;
   нужны device version etag
 */
 
-const configRecordSchema = new Schema({
+const configFieldSchema = new Schema({
   client: String,
   version: String,
   etag: Number,
@@ -42,40 +42,36 @@ const configRecordSchema = new Schema({
   value: String
 });
 
-configRecordSchema.plugin(require('mongoose-create-or-update'));
-
 const configEtagSchema = new Schema({
   client: String,
   version: String,
   etag: { type: Number, default: 1 }
 });
 
-const ConfigRecord = mongoose.model('ConfigRecord', configRecordSchema);
+const ConfigField = mongoose.model('ConfigField', configFieldSchema);
 const ConfigEtag = mongoose.model('ConfigEtag', configEtagSchema);
 
-function recordsReducer (res, { key, value }) {
-    // return ({ ...res, key, value });
-}
+function createConfig(record) {
+  const { client, version, key, value } = record;
+  return { client, version, [key] : value };
+};
 
 module.exports = {
   find: ({ client, version }) => {
-    return ConfigRecord.find({ client, version })
+    return ConfigField.find({ client, version })
       .then(records => {
         if (records.length === 0) return null;
-        return records[0];
-        // return records.reduce(recordsReducer);
+        return records.reduce((res,record) => Object.assign({}, res, createConfig(record)), {});
       });
   },
   upsert: ({ client, version, key, value }) => {
-    return ConfigRecord.createOrUpdate({ client, version, key },
-                                       { client , version, [key]: value });
-    // const id = counter ++;
-    // storage.set( client + version , { key, value, id: id.toString() });
-    // return Promise.resolve(id.toString());
+    return ConfigField.findOneAndUpdate(
+      { client, version, key },
+      { client , version, key, value },
+      { upsert: true, new: true})
+      .then(createConfig);
   },
   reset: () => {
-    return ConfigRecord.collection.drop();
-    // storage.clear();
-    // counter = 0;
+    return ConfigField.collection.drop();
   }
 };
