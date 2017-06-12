@@ -52,8 +52,8 @@ const ConfigField = mongoose.model('ConfigField', configFieldSchema);
 const ConfigEtag = mongoose.model('ConfigEtag', configEtagSchema);
 
 function createConfig(record) {
-  const { client, version, key, value } = record;
-  return { client, version, [key] : value };
+  const { client, version, key, value, etag } = record;
+  return { client, version, [key] : value, etag };
 };
 
 module.exports = {
@@ -65,13 +65,17 @@ module.exports = {
       });
   },
   upsert: ({ client, version, key, value }) => {
-    return ConfigField.findOneAndUpdate(
-      { client, version, key },
-      { client , version, key, value },
-      { upsert: true, new: true})
+    return ConfigEtag.findOneAndUpdate(
+      {client, version},
+      {client, version, $inc: { etag: 1}},
+      {upsert: true, new: true})
+      .then(({ etag }) => ConfigField.findOneAndUpdate(
+        { client, version, key },
+        { client , version, key, value, etag },
+        { upsert: true, new: true}))
       .then(createConfig);
   },
   reset: () => {
-    return ConfigField.collection.drop();
+    return Promise.all([ConfigField.collection.drop(), ConfigEtag.collection.drop()]);
   }
 };

@@ -24,7 +24,8 @@ describe('config model', () => {
           .then(record => {
             record.should.have.properties({ client: 'ios',
                                             version: '123',
-                                            color: 'red'
+                                            color: 'red',
+                                            etag: 1
                                           });
             done();
           })
@@ -39,7 +40,7 @@ describe('config model', () => {
           model.upsert({ client: 'ios', version: '123', key: 'color', value: 'red' })
             .then(() => model.upsert( { client: 'ios', version: '123', key: 'color', value: 'green' } ))
             .then(record => {
-              record.should.have.properties({ client: 'ios', version: '123', color: 'green' });
+              record.should.have.properties({ client: 'ios', version: '123', color: 'green', etag: 2 });
               done();
             })
             .catch(error => {
