@@ -6,7 +6,7 @@ describe('config model', () => {
     model.reset().catch(err => {});
   });
   describe('find', () => {
-    describe('existing config', () => {
+    describe('missing config', () => {
       it('returns Promise(undefined) for missing configuration', (done) => {
         model.find({ client: 'ios', version: 123 })
           .then(record => {
@@ -33,15 +33,35 @@ describe('config model', () => {
     });
     describe('updated config', () => {
       it('returns Promise(record) with updated data', (done) => {
-        const input = { client: "ios", version: 123, key: 'color', value: 'red' };
-        const updateInput = { client: "ios", version: 123, key: 'color', value: 'blue' };
-        model.upsert(input)
-          .then(()=> model.find({ client: input.client, version: input.version }))
-          .then(()=> model.upsert({ client: input.client,
-                                    version: input.version,
-                                    color: 'blue'}))
+        const input1 = { client: "ios", version: 123, key: 'color', value: 'red' };
+        const input2 = { client: "ios", version: 123, key: 'color', value: 'blue' };
+        const input3 = { client: "ios", version: 123, key: 'size', value: 'XL' };
+        model.upsert(input1)
           .then(record => {
-            record.should.have.properties(input);
+            record.should.have.properties({
+              client: 'ios',
+              version: 123,
+              color: 'red'
+            });
+            return record;
+          })
+          .then(()=> model.upsert(input2))
+          .then(record => {
+            record.should.have.properties({
+              client: 'ios',
+              version: 123,
+              color: 'blue'
+            });
+            return record;
+          })
+          .then(()=> model.upsert(input3))
+          .then(record => {
+            record.should.have.properties({
+              client: 'ios',
+              version: 123,
+              color: 'blue',
+              size: 'XL'
+            });
             done();
           })
           .catch(() => done());
