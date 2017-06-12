@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test:integration": "./node_modules/.bin/swagger project test",
+    "test": "./node_modules/.bin/swagger project test",
     "test:coverage": "swagger_mockMode=true istanbul cover node_modules/.bin/_mocha -- --recursive test/"
   }
 }
