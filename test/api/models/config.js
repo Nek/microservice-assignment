@@ -3,7 +3,7 @@ const model = require('../../../api/models/config');
 
 describe('config model', () => {
   beforeEach(() => {
-    model.reset();
+    model.reset().catch(err => {});
   });
   describe('find', () => {
     describe('existing config', () => {

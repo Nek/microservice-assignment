@@ -74,7 +74,7 @@ module.exports = {
     // return Promise.resolve(id.toString());
   },
   reset: () => {
-    ConfigRecord.collection.drop();
+    return ConfigRecord.collection.drop();
     // storage.clear();
     // counter = 0;
   }
