@@ -57,8 +57,10 @@ function createConfig(record) {
 };
 
 module.exports = {
-  find: ({ client, version }) => {
-    return ConfigField.find({ client, version })
+  find: ({ client, version, etag }) => {
+    const query = Object.assign({ client, version },
+                                etag ? { etag: { $gt: etag }} : {});
+    return ConfigField.find(query)
       .then(records => {
         if (records.length === 0) return null;
         return records.reduce((res,record) => Object.assign({}, res, createConfig(record)), {});

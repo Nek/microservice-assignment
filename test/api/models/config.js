@@ -66,21 +66,35 @@ describe('config model', () => {
   });
   describe('upsert and find', () => {
     describe('new config',() => {
-      it('resolves with config record', (done) => {
-        const input = { client: 'ios', version: '123', key: 'color', value: 'red' };
-        model.upsert({ client: 'ios', version: '123', key: 'color', value: 'red' })
-          .then(()=> model.find({ client: 'ios', version: '123' }))
-          .then(record => {
-            record.should.have.properties({
-              client: 'ios',
-              version: '123',
-              color: 'red'
+      describe('without etag', () => {
+        it('resolves with config record', (done) => {
+          model.upsert({ client: 'ios', version: '123', key: 'color', value: 'red' })
+            .then(()=> model.find({ client: 'ios', version: '123' }))
+            .then(record => {
+              record.should.have.properties({
+                client: 'ios',
+                version: '123',
+                color: 'red'
+              });
+              done();
+            })
+            .catch(error => {
+              done(new Error(error));
             });
-            done();
-          })
-          .catch(error => {
-            done(new Error(error));
-          });
+        });
+      });
+      describe('with etag', () => {
+        it('resolves with config record', (done) => {
+          model.upsert({ client: 'ios', version: '123', key: 'color', value: 'red' })
+            .then(()=> model.find({ client: 'ios', version: '123', etag: 1 }))
+            .then(record => {
+              should(record).be.equal(null);
+              done();
+            })
+            .catch(error => {
+              done(new Error(error));
+            });
+        });
       });
     });
   });
