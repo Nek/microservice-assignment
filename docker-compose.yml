@@ -1,8 +1,10 @@
-version: '2'
+version: '3'
 
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: ./docker/prod/Dockerfile
     ports:
       - "80:10010"
     links:
