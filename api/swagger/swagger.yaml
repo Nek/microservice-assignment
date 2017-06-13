@@ -18,7 +18,7 @@ produces:
 
 paths:
   /config/{client}/{version}:
-    x-swagger-router-controller: config
+    x-swagger-router-controller: configuration
     get:
       operationId: read
       description: Get all changed configurations since the last received change for a given client and version
@@ -48,7 +48,7 @@ paths:
         default:
           description: Error
   /config:
-    x-swagger-router-controller: config
+    x-swagger-router-controller: configuration
     post:
       operationId: upsert
       description: Change or create a configuration

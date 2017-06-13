@@ -43,8 +43,6 @@ describe('controllers', function() {
 
 
 
-
-
     describe.skip('GET /config', () => {
       it.skip('returns 304 for missing config', (done) => {
         /*

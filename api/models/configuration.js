@@ -34,7 +34,7 @@ const Schema = mongoose.Schema;
   нужны device version etag
 */
 
-const configFieldSchema = new Schema({
+const configSchema = new Schema({
   client: String,
   version: String,
   etag: Number,
@@ -42,16 +42,16 @@ const configFieldSchema = new Schema({
   value: String
 });
 
-const configEtagSchema = new Schema({
+const latestEtagSchema = new Schema({
   client: String,
   version: String,
-  etag: { type: Number, default: 1 }
+  etag: { type: Number, default: 0 }
 });
 
-const ConfigField = mongoose.model('ConfigField', configFieldSchema);
-const ConfigEtag = mongoose.model('ConfigEtag', configEtagSchema);
+const Config = mongoose.model('Config', configSchema);
+const LatestEtag = mongoose.model('LatestEtag', latestEtagSchema);
 
-function createConfig(record) {
+function createConfigurationObject(record) {
   const { client, version, key, value, etag } = record;
   return { client, version, [key] : value, etag };
 };
@@ -60,24 +60,25 @@ module.exports = {
   find: ({ client, version, etag }) => {
     const query = Object.assign({ client, version },
                                 etag ? { etag: { $gt: etag }} : {});
-    return ConfigField.find(query)
+    return Config.find(query)
+      .sort('etag')
+      .exec()
       .then(records => {
         if (records.length === 0) return null;
-        return records.reduce((res,record) => Object.assign({}, res, createConfig(record)), {});
+        return records.reduce((res,record) => Object.assign({}, res, createConfigurationObject(record)), {});
       });
   },
   upsert: ({ client, version, key, value }) => {
-    return ConfigEtag.findOneAndUpdate(
+    return LatestEtag.findOneAndUpdate(
       {client, version},
       {client, version, $inc: { etag: 1}},
-      {upsert: true, new: true})
-      .then(({ etag }) => ConfigField.findOneAndUpdate(
+      {upsert: true, new: true, setDefaultsOnInsert: true})
+      .then(({ etag }) => Config.findOneAndUpdate(
         { client, version, key },
         { client , version, key, value, etag },
-        { upsert: true, new: true}))
-      .then(createConfig);
+        { upsert: true, new: true}));
   },
   reset: () => {
-    return Promise.all([ConfigField.collection.drop(), ConfigEtag.collection.drop()]);
+    return Promise.all([Config.collection.drop(), LatestEtag.collection.drop()]);
   }
 };

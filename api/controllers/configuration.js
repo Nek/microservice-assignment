@@ -1,6 +1,6 @@
 const util = require('util');
 
-const model = require('../models/config');
+const model = require('../models/configuration');
 
 
 function upsert(req, res) {
