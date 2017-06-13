@@ -52,8 +52,8 @@ const Config = mongoose.model('Config', configSchema);
 const LatestEtag = mongoose.model('LatestEtag', latestEtagSchema);
 
 function createConfigurationObject(record) {
-  const { client, version, key, value, etag } = record;
-  return { client, version, [key] : value, etag };
+  const { key, value, etag } = record;
+  return { [key] : value, etag };
 };
 
 module.exports = {

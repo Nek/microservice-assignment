@@ -2,8 +2,8 @@ const should = require('should');
 const model = require('../../../api/models/configuration');
 
 describe('config model', () => {
-  beforeEach(() => {
-    model.reset().catch(err => {});
+  beforeEach((done) => {
+    model.reset().then(() => done()).catch(err => done());
   });
   describe('find', () => {
     describe('missing configurations object', () => {
@@ -98,38 +98,35 @@ describe('config model', () => {
                                   version: '123' }))
           .then(record => {
             record.should.have.properties({
-              client: 'ios',
-              version: '123',
               color: 'red',
               etag: 1
             });
             return;
           })
-          .then(() => model.upsert({ client: 'ios',
-                                     version: '123',
-                                     key: 'color',
-                                     value: 'red' }))
+          .then(() => model.upsert({
+            client: 'ios',
+            version: '123',
+            key: 'color',
+            value: 'red' }))
           .then(()=> model.find({ client: 'ios',
                                   version: '123' }))
           .then(record => {
             record.should.have.properties({
-              client: 'ios',
-              version: '123',
               color: 'red',
               etag: 2
             });
             return;
           })
-          .then(() => model.upsert({ client: 'ios',
-                                     version: '123',
-                                     key: 'size',
-                                     value: 'XL' }))
-          .then(()=> model.find({ client: 'ios',
-                                  version: '123' }))
+          .then(() => model.upsert({
+            client: 'ios',
+            version: '123',
+            key: 'size',
+            value: 'XL' }))
+          .then(()=> model.find({
+            client: 'ios',
+            version: '123' }))
           .then(record => {
             record.should.have.properties({
-              client: 'ios',
-              version: '123',
               color: 'red',
               size: 'XL',
               etag: 3
@@ -163,10 +160,11 @@ describe('config model', () => {
     });
     describe('with etag not equal to the latest etag', () => {
       it('resolves with configurations object with configurations since given etag', (done) => {
-        model.upsert({ client: 'ios',
-                       version: '123',
-                       key: 'color',
-                       value: 'red' })
+        model.upsert({
+          client: 'ios',
+          version: '123',
+          key: 'color',
+          value: 'red' })
           .then(() => model.upsert({ client: 'ios',
                                      version: '123',
                                      key: 'size',
@@ -176,8 +174,6 @@ describe('config model', () => {
                                   etag: 1 }))
           .then(record => {
             record.should.have.properties({
-              client: 'ios',
-              version: '123',
               size: 'XL',
               etag: 2
             });
